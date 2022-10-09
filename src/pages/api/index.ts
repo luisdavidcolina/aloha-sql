@@ -1,10 +1,11 @@
 import sql from 'mssql'
 import getHandler from '@/pages/api/getHandler'
+import items from './items'
 
 const config = {
   user: 'sa',
   password: 'Soporte23',
-  server: 'ALOHABOH\\SQLEXPRESS',
+  server: 'ALOHABOH-PRUEBA\SQLEXPRESS',
   database: 'CFCStandaloneDB',
   options: {
     trustServerCertificate: true,
@@ -14,31 +15,20 @@ const config = {
 const handler = getHandler()
 
 handler.get(async (req, res) => {
-  //
-  res.json('d')
-})
-
-handler.post(async (req, res) => {
-  try {
-    const { body } = req
-    const { ID, PRICE } = body
-    sql.connect(config, function (err) {
-      if (err) console.log(err)
-      let query = `UPDATE Item
-      SET DefaultPrice = '${PRICE}'
-      WHERE Number = '${ID}'`
-
-      sql.query(query, (error, results, fields) => {
+  sql.connect(config, function (err) {
+    if (err) res.json(err)
+    items.forEach((item) => {
+      let query = `UPDATE [CFCStandaloneDB].[dbo].[Item]
+      SET LongName = '${item.LongName}', ShortName = '${item.ShortName}', ChitName = '${item.ShortName}', DefaultPrice = '${item.DefaultPrice}'
+      WHERE Number = '${item.Number}';`
+      sql.query(query, (error, results) => {
         if (error) {
           res.json(error)
         }
-        res.json('ok')
       })
     })
-  } catch (e) {
-    console.log(e)
-    res.json(e)
-  }
+  })
+  res.json('ok')
 })
 
 export default handler
